@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-Time Language Translator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #e0f7fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00796b;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      color: #555;
+    }
+    select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #00796b;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    .output {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f1f8e9;
+      border-radius: 8px;
+      border: 1px solid #cddc39;
+    }
+    .lang-selects {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .lang-selects > div {
+      flex: 1;
+      min-width: 45%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🌐 Real-Time Language Translator</h2>
+
+  <div class="lang-selects">
+    <div>
+      <label for="sourceLang">From (Input Language):</label>
+      <select id="sourceLang">
+        <option value="en">English</option>
+        <option value="fr">French</option>
+        <option value="es">Spanish</option>
+        <option value="de">German</option>
+        <option value="ar">Arabic</option>
+        <option value="hi">Hindi</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="targetLang">To (Output Language):</label>
+      <select id="targetLang">
+        <option value="fr">French</option>
+        <option value="es">Spanish</option>
+        <option value="de">German</option>
+        <option value="ar">Arabic</option>
+        <option value="hi">Hindi</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </div>
+
+  <label for="inputText">Enter text to translate:</label>
+  <textarea id="inputText" rows="4" placeholder="Type your text here..."></textarea>
+
+  <button onclick="translateText()">Translate 🔁</button>
+
+  <div class="output" id="output">
+    <strong>Translated Text will appear here...</strong>
+  </div>
+</div>
+
+<script>
+  async function translateText() {
+    const inputText = document.getElementById('inputText').value.trim();
+    const sourceLang = document.getElementById('sourceLang').value;
+    const targetLang = document.getElementById('targetLang').value;
+    const outputDiv = document.getElementById('output');
+
+    if (!inputText) {
+      outputDiv.innerHTML = `<strong style="color: red;">Please enter some text to translate.</strong>`;
+      return;
+    }
+
+    const apiKey = 'YOUR_GOOGLE_API_KEY'; // 🔐 Replace this with your actual API key
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          q: inputText,
+          source: sourceLang,
+          target: targetLang,
+          format: 'text'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        outputDiv.innerHTML = `<strong style="color:red;">Error: ${data.error.message}</strong>`;
+        return;
+      }
+
+      const translated = data.data.translations[0].translatedText;
+
+      outputDiv.innerHTML = `
+        <strong>Original (${sourceLang.toUpperCase()}):</strong><br>
+        ${inputText}<br><br>
+        <strong>Translated (${targetLang.toUpperCase()}):</strong><br>
+        ${translated}
+      `;
+    } catch (err) {
+      outputDiv.innerHTML = `<strong style="color: red;">Translation failed. Check API key or connection.</strong>`;
+      console.error("Error during translation:", err);
+    }
+  }
+</script>
+
+</body>
+</html>
